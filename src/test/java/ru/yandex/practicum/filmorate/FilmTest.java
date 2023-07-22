@@ -40,8 +40,7 @@ public class FilmTest {
                 .releaseDate(LocalDate.of(1967, 03, 25))
                 .duration(100)
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             filmController.create(film);
         }, "название не может быть пустым");
     }
@@ -54,8 +53,7 @@ public class FilmTest {
                 .releaseDate(LocalDate.of(1967, 03, 25))
                 .duration(100)
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             filmController.create(film);
         }, "название не может быть пустым");
     }
@@ -71,8 +69,7 @@ public class FilmTest {
                 .releaseDate(LocalDate.of(1967, 03, 25))
                 .duration(100)
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             filmController.create(film);
         }, "максимальная длина описания — 200 символов");
     }
@@ -99,8 +96,7 @@ public class FilmTest {
                 .releaseDate(LocalDate.of(1890, 03, 25))
                 .duration(100)
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             filmController.create(film);
         }, "дата релиза — не раньше 28 декабря 1895 года");
     }
@@ -113,8 +109,7 @@ public class FilmTest {
                 .releaseDate(LocalDate.of(1895, 12, 28).minus(1, ChronoUnit.DAYS))
                 .duration(100)
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             filmController.create(film);
         }, "дата релиза — не раньше 28 декабря 1895 года");
     }
@@ -139,8 +134,7 @@ public class FilmTest {
                 .releaseDate(LocalDate.of(1990, 03, 25))
                 .duration(-1)
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             filmController.create(film);
         }, "продолжительность фильма должна быть положительной");
     }
@@ -175,8 +169,7 @@ public class FilmTest {
                 .releaseDate(LocalDate.of(1990, 03, 25))
                 .duration(100)
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             filmController.update(film);
         }, "Фильма с таким ID нетй");
     }

@@ -40,8 +40,7 @@ public class UserTest {
                 .email("mail@mail.ru")
                 .birthday(LocalDate.of(1946, 8, 20))
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             userController.create(user);
         }, "логин не может быть пустым и содержать пробелы");
     }
@@ -54,8 +53,7 @@ public class UserTest {
                 .email("mail@mail.ru")
                 .birthday(LocalDate.of(1946, 8, 20))
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             userController.create(user);
         }, "логин не может быть пустым и содержать пробелы");
     }
@@ -67,8 +65,7 @@ public class UserTest {
                 .name("Nick Name")
                 .birthday(LocalDate.of(1946, 8, 20))
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             userController.create(user);
         }, "электронная почта не может быть пустой и должна содержать символ @");
     }
@@ -81,8 +78,7 @@ public class UserTest {
                 .email(" ")
                 .birthday(LocalDate.of(1946, 8, 20))
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             userController.create(user);
         }, "электронная почта не может быть пустой и должна содержать символ @");
     }
@@ -95,8 +91,7 @@ public class UserTest {
                 .email("mail.ru")
                 .birthday(LocalDate.of(1946, 8, 20))
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             userController.create(user);
         }, "электронная почта не может быть пустой и должна содержать символ @");
     }
@@ -109,8 +104,7 @@ public class UserTest {
                 .email("mail@mail.ru")
                 .birthday(LocalDate.of(2446, 8, 20))
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             userController.create(user);
         }, "дата рождения не может быть в будущем");
     }
@@ -135,8 +129,7 @@ public class UserTest {
                 .email("mail@mail.ru")
                 .birthday(LocalDate.now().plus(1, ChronoUnit.DAYS))
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             userController.create(user);
         }, "дата рождения не может быть в будущем");
     }
@@ -171,8 +164,7 @@ public class UserTest {
                 .email("mail@mail.ru")
                 .birthday(LocalDate.of(1976, 9, 20))
                 .build();
-        assertThrows(ValidationException.class, () ->
-        {
+        assertThrows(ValidationException.class, () -> {
             userController.update(user);
         }, "Пользователя с таким ID нет");
     }
