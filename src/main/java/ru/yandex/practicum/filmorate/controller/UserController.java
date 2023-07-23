@@ -6,10 +6,11 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+
+import static ru.yandex.practicum.filmorate.utilites.Validation.validationUser;
 
 @RestController
 @RequestMapping("/users")
@@ -27,24 +28,10 @@ public class UserController {
     @PostMapping
     public User create(@Valid @RequestBody User user) {
         log.info("Запрос на создания пользователя");
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.warn("электронная почта пустая или не содержит символ @");
-            throw new ValidationException("электронная почта не может быть пустой и должна содержать символ @");
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank()) {
-            log.warn("логин пустой или содержит пробелы");
-            throw new ValidationException("логин не может быть пустым и содержать пробелы");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Дата рождения в будущем ");
-            throw new ValidationException("дата рождения не может быть в будущем");
-        }
+        validationUser(user);
         user.setId(++id);
         users.put(user.getId(), user);
-        log.info("Фильм добавлен");
+        log.info("Пользователь добавлен");
         return user;
     }
 
@@ -60,24 +47,9 @@ public class UserController {
             log.warn("Пользователя с ID {} не найден", user.getId());
             throw new ValidationException("Пользователя с таким ID нет");
         }
-        log.info("Запрос на обновление пользователя");
-        if (user.getEmail() == null || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
-            log.warn("электронная почта пустая или не содержит символ @");
-            throw new ValidationException("электронная почта не может быть пустой и должна содержать символ @");
-        }
-        if (user.getLogin() == null || user.getLogin().isBlank()) {
-            log.warn("логин пустой или содержит пробелы");
-            throw new ValidationException("логин не может быть пустым и содержать пробелы");
-        }
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-        }
-        if (user.getBirthday().isAfter(LocalDate.now())) {
-            log.warn("Дата рождения в будущем ");
-            throw new ValidationException("дата рождения не может быть в будущем");
-        }
+        validationUser(user);
         users.put(user.getId(), user);
-        log.info("Фильм обновлен");
+        log.info("Пользователь обновлен");
         return user;
     }
 
