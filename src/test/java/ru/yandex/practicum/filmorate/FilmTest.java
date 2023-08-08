@@ -2,10 +2,13 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,10 +18,13 @@ import java.time.temporal.ChronoUnit;
 @SpringBootTest
 public class FilmTest {
     FilmController filmController;
+    FilmService filmService;
+    FilmStorage filmStorage;
 
     @BeforeEach
+    @Autowired
     void createController() {
-        filmController = new FilmController();
+        filmController = new FilmController(filmService, filmStorage);
     }
 
     @Test
@@ -149,7 +155,7 @@ public class FilmTest {
                 .build();
         Film filmSave = filmController.create(film);
         film = Film.builder()
-                .id(1)
+                .id(1L)
                 .name("Film Updated")
                 .description("New film update decription")
                 .releaseDate(LocalDate.of(1989, 04, 17))
@@ -163,7 +169,7 @@ public class FilmTest {
     @Test
     void updateFilmUnknown() {
         Film film = Film.builder()
-                .id(9999)
+                .id(9999L)
                 .name("nisi eiusmod")
                 .description("Description")
                 .releaseDate(LocalDate.of(1990, 03, 25))
