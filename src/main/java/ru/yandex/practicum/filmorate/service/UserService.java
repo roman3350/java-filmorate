@@ -54,8 +54,10 @@ public class UserService {
      * @return общие друзья
      */
     public List<User> commonFriends(Long id, Long friendId) {
-        return userStorage.findById(id).getFriends().stream().
-                filter(userStorage.findById(friendId).
+        return userStorage.findById(id).getFriends().
+                stream().
+                filter(userStorage.
+                        findById(friendId).
                         getFriends()::contains).
                 map(userStorage::findById).
                 collect(Collectors.toList());
