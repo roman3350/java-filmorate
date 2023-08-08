@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
@@ -18,11 +19,12 @@ import java.time.temporal.ChronoUnit;
 @SpringBootTest
 public class FilmTest {
     FilmController filmController;
+    @Autowired
     FilmService filmService;
+    @Autowired
     FilmStorage filmStorage;
 
     @BeforeEach
-    @Autowired
     void createController() {
         filmController = new FilmController(filmService, filmStorage);
     }
@@ -175,9 +177,9 @@ public class FilmTest {
                 .releaseDate(LocalDate.of(1990, 03, 25))
                 .duration(100)
                 .build();
-        assertThrows(ValidationException.class, () -> {
+        assertThrows(FilmNotFoundException.class, () -> {
             filmController.update(film);
-        }, "Фильма с таким ID нетй");
+        }, "Фильм с ID 9999 не найден");
     }
 
 }

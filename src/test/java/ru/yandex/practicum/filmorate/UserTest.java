@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -18,11 +19,12 @@ import java.time.temporal.ChronoUnit;
 @SpringBootTest
 public class UserTest {
     UserController userController;
+    @Autowired
     UserService userService;
+    @Autowired
     UserStorage userStorage;
 
     @BeforeEach
-    @Autowired
     void createController() {
         userController = new UserController(userService, userStorage);
     }
@@ -170,7 +172,7 @@ public class UserTest {
                 .email("mail@mail.ru")
                 .birthday(LocalDate.of(1976, 9, 20))
                 .build();
-        assertThrows(ValidationException.class, () -> {
+        assertThrows(UserNotFoundException.class, () -> {
             userController.update(user);
         }, "Пользователя с таким ID нет");
     }
