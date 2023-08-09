@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -16,11 +15,9 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
-    private final UserStorage userStorage;
 
-    public UserController(UserService userService, UserStorage userStorage) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.userStorage = userStorage;
     }
 
     /**
@@ -31,7 +28,7 @@ public class UserController {
      */
     @PostMapping
     public User create(@Valid @RequestBody User user) {
-        return userStorage.create(user);
+        return userService.create(user);
     }
 
     /**
@@ -42,7 +39,7 @@ public class UserController {
      */
     @PutMapping
     public User update(@Valid @RequestBody User user) {
-        return userStorage.update(user);
+        return userService.update(user);
     }
 
     /**
@@ -52,7 +49,7 @@ public class UserController {
      */
     @GetMapping()
     public Collection<User> findAll() {
-        return userStorage.findAll();
+        return userService.findAll();
     }
 
     /**
@@ -62,8 +59,8 @@ public class UserController {
      * @return пользователь
      */
     @GetMapping("/{id}")
-    public User findById(@PathVariable Long id) {
-        return userStorage.findById(id);
+    public User findUserById(@PathVariable Long id) {
+        return userService.findUserById(id);
     }
 
     /**

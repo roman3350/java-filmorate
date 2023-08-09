@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -15,11 +14,9 @@ import java.util.List;
 @Slf4j
 public class FilmController {
     private final FilmService filmService;
-    private final FilmStorage filmStorage;
 
-    public FilmController(FilmService filmService, FilmStorage filmStorage) {
+    public FilmController(FilmService filmService) {
         this.filmService = filmService;
-        this.filmStorage = filmStorage;
     }
 
     /**
@@ -30,7 +27,7 @@ public class FilmController {
      */
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        return filmStorage.create(film);
+        return filmService.create(film);
     }
 
     /**
@@ -41,7 +38,7 @@ public class FilmController {
      */
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        return filmStorage.update(film);
+        return filmService.update(film);
     }
 
     /**
@@ -51,7 +48,7 @@ public class FilmController {
      */
     @GetMapping
     public Collection<Film> findAll() {
-        return filmStorage.findAll();
+        return filmService.findAll();
     }
 
     /**
@@ -62,7 +59,7 @@ public class FilmController {
      */
     @GetMapping("/{id}")
     public Film findById(@PathVariable Long id) {
-        return filmStorage.findById(id);
+        return filmService.findFilmById(id);
     }
 
     /**

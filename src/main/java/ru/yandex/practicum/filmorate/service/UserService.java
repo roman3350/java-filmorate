@@ -2,12 +2,15 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ru.yandex.practicum.filmorate.utilites.Validation.checkUserExists;
 
 @Service
 public class UserService {
@@ -19,6 +22,45 @@ public class UserService {
     }
 
     /**
+     * Создает пользователя
+     *
+     * @param user объект пользователя
+     * @return созданный пользователь
+     */
+    public User create(User user) {
+        return userStorage.create(user);
+    }
+
+    /**
+     * Обновляет пользователя
+     *
+     * @param user объект пользователя
+     * @return обновленный пользователь
+     */
+    public User update(User user) {
+        return userStorage.update(user);
+    }
+
+    /**
+     * Список всех пользователей
+     *
+     * @return лист всех пользователей
+     */
+    public Collection<User> findAll() {
+        return userStorage.findAll();
+    }
+
+    /**
+     * Возвращает пользователя по id
+     *
+     * @param id id пользователя
+     * @return пользователь
+     */
+    public User findUserById(@PathVariable Long id) {
+        return userStorage.findUserById(id);
+    }
+
+    /**
      * добавление пользователя в друзья
      *
      * @param id       id пользователя
@@ -26,10 +68,10 @@ public class UserService {
      * @return добавленный друг
      */
     public User addFriend(Long id, Long friendId) {
-        findUser(friendId);
-        userStorage.findById(id).getFriends().add(friendId);
-        userStorage.findById(friendId).getFriends().add(id);
-        return userStorage.findById(friendId);
+        checkUserExists(friendId, userStorage);
+        userStorage.findUserById(id).getFriends().add(friendId);
+        userStorage.findUserById(friendId).getFriends().add(id);
+        return userStorage.findUserById(friendId);
     }
 
     /**
@@ -40,10 +82,10 @@ public class UserService {
      * @return друг удаленный из друзей
      */
     public User deleteFriend(Long id, Long friendId) {
-        findUser(friendId);
-        userStorage.findById(id).getFriends().remove(friendId);
-        userStorage.findById(friendId).getFriends().remove(id);
-        return userStorage.findById(friendId);
+        checkUserExists(friendId, userStorage);
+        userStorage.findUserById(id).getFriends().remove(friendId);
+        userStorage.findUserById(friendId).getFriends().remove(id);
+        return userStorage.findUserById(friendId);
     }
 
     /**
@@ -55,14 +97,14 @@ public class UserService {
      */
     public List<User> commonFriends(Long id, Long friendId) {
         return userStorage
-                .findById(id)
+                .findUserById(id)
                 .getFriends()
-                        .stream()
-                                .filter(userStorage
-                                        .findById(friendId)
-                                                .getFriends()::contains)
-                                        .map(userStorage::findById)
-                                                .collect(Collectors.toList());
+                .stream()
+                .filter(userStorage
+                        .findUserById(friendId)
+                        .getFriends()::contains)
+                .map(userStorage::findUserById)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -73,16 +115,10 @@ public class UserService {
      */
     public List<User> getFriends(Long id) {
         return userStorage
-                .findById(id)
+                .findUserById(id)
                 .getFriends()
                 .stream()
-                        .map(userStorage::findById)
-                                .collect(Collectors.toList());
-    }
-
-    public void findUser(Long id) {
-        if (userStorage.findById(id) == null) {
-            throw new UserNotFoundException("Друга с таким Id нет");
-        }
+                .map(userStorage::findUserById)
+                .collect(Collectors.toList());
     }
 }

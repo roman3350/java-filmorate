@@ -26,7 +26,7 @@ public class FilmTest {
 
     @BeforeEach
     void createController() {
-        filmController = new FilmController(filmService, filmStorage);
+        filmController = new FilmController(filmService);
     }
 
     @Test
