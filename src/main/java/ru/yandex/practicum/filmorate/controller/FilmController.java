@@ -2,65 +2,98 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import static ru.yandex.practicum.filmorate.utilites.Validation.validationFilm;
+import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
-    private Map<Integer, Film> films = new HashMap<>();
-    private int id;
+    private final FilmService filmService;
+
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     /**
-     * Проверяет данные, при успешной проверке добавляет объект фильма в мапу
+     * Принимает из тела запроса фильм и добавляет его
      *
      * @param film объект фильма
      * @return добавленный объект фильма
      */
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        log.info("Запрос на добавления фильма");
-        validationFilm(film);
-        film.setId(++id);
-        films.put(film.getId(), film);
-        log.info("Фильм добавлен");
-        return film;
+        return filmService.create(film);
     }
 
-
     /**
-     * Проверяет данные, при успешной проверке обновляет фильм
+     * Принимает из тела запроса фильм и обновляет его
      *
      * @param film объект фильма
-     * @return обновленный объект фильма
+     * @return обновленный фильм
      */
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
-        if (!films.containsKey(film.getId())) {
-            log.warn("Фильм с ID {} не найден", film.getId());
-            throw new ValidationException("Фильма с таким ID нет");
-        }
-        validationFilm(film);
-        films.put(film.getId(), film);
-        log.info("Фильм обновлен");
-        return film;
+        return filmService.update(film);
     }
 
     /**
-     * Возвращает все добавленные фильмы
+     * Вывод всех добавленные фильмы
      *
-     * @return добавленные фильмы
+     * @return список всех фильмов
      */
     @GetMapping
     public Collection<Film> findAll() {
-        return films.values();
+        return filmService.findAll();
+    }
+
+    /**
+     * Принимает из пути id и выводит фильм по этому id
+     *
+     * @param id id фильма
+     * @return фильм по id
+     */
+    @GetMapping("/{id}")
+    public Film findById(@PathVariable Long id) {
+        return filmService.findFilmById(id);
+    }
+
+    /**
+     * Добавляет лайк фильму, из пути берет id фильма и id пользователя ставящего лайк
+     *
+     * @param id     id фильма
+     * @param userId id пользователя
+     * @return лайкнутый фильм
+     */
+    @PutMapping("/{id}/like/{userId}")
+    public Film addLike(@PathVariable Long id, @PathVariable Long userId) {
+        return filmService.addLike(id, userId);
+    }
+
+    /**
+     * удаляет лайк пользователя с фильма
+     *
+     * @param id     id фильма
+     * @param userId id пользователя
+     * @return фильм с которого удалили лайк
+     */
+    @DeleteMapping("/{id}/like/{userId}")
+    public Film deleteLike(@PathVariable Long id, @PathVariable Long userId) {
+        return filmService.deleteLike(id, userId);
+    }
+
+    /**
+     * Выводит фильмы по популярности
+     *
+     * @param count необязательный параметр количества фильмов на вывод
+     * @return фильмы по популярности
+     */
+    @GetMapping("/popular")
+    public List<Film> getPopularFilm(@RequestParam(defaultValue = "10", required = false) Integer count) {
+        return filmService.getFilmQuantityLike(count);
     }
 }

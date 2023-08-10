@@ -1,9 +1,11 @@
 package ru.yandex.practicum.filmorate.utilites;
 
 import lombok.extern.slf4j.Slf4j;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.time.LocalDate;
 
@@ -44,6 +46,12 @@ public class Validation {
         if (film.getDuration() < 0) {
             log.warn("Продолжительность отрицательная");
             throw new ValidationException("продолжительность фильма должна быть положительной");
+        }
+    }
+
+    public static void checkUserExists(Long id, UserStorage userStorage) {
+        if (userStorage.findUserById(id) == null) {
+            throw new UserNotFoundException("Друга с таким Id нет");
         }
     }
 }

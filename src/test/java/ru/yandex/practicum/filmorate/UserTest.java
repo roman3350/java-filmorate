@@ -2,10 +2,14 @@ package ru.yandex.practicum.filmorate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.UserController;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,10 +19,14 @@ import java.time.temporal.ChronoUnit;
 @SpringBootTest
 public class UserTest {
     UserController userController;
+    @Autowired
+    UserService userService;
+    @Autowired
+    UserStorage userStorage;
 
     @BeforeEach
     void createController() {
-        userController = new UserController();
+        userController = new UserController(userService);
     }
 
     @Test
@@ -144,7 +152,7 @@ public class UserTest {
                 .build();
         User userSave = userController.create(user);
         user = User.builder()
-                .id(1)
+                .id(1L)
                 .login("doloreUpdate")
                 .name("est adipisicing")
                 .email("mail@mail.ru")
@@ -158,13 +166,13 @@ public class UserTest {
     @Test
     void updateUserUnknown() {
         User user = User.builder()
-                .id(9999)
+                .id(9999L)
                 .login("doloreUpdate")
                 .name("est adipisicing")
                 .email("mail@mail.ru")
                 .birthday(LocalDate.of(1976, 9, 20))
                 .build();
-        assertThrows(ValidationException.class, () -> {
+        assertThrows(UserNotFoundException.class, () -> {
             userController.update(user);
         }, "Пользователя с таким ID нет");
     }
