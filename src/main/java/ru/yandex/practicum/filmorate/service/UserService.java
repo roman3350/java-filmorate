@@ -8,6 +8,7 @@ import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.utilites.Validation.checkUserExists;
@@ -57,6 +58,8 @@ public class UserService {
      * @return пользователь
      */
     public User findUserById(Long id) {
+        Optional<User> user = userStorage.findUserById(id);
+        checkUserExists(user);
         return userStorage.findUserById(id).get();
     }
 

@@ -21,15 +21,15 @@ public class Film {
     @Positive
     private int duration;
     private MPA mpa;
-    private Genre genre;
+    private Genre genres;
 
-    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, MPA mpa, Genre genre) {
+    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, MPA mpa, Genre genres) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.mpa = mpa;
-        this.genre = genre;
+        this.genres = genres;
     }
 }

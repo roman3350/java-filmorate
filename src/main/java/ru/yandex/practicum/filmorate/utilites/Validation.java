@@ -53,7 +53,7 @@ public class Validation {
 
     public static void checkUserExists(Optional<User> user) {
         if (user.isEmpty()) {
-            throw new UserNotFoundException("Друга с таким Id нет");
+            throw new UserNotFoundException("Пользователя с таким Id нет");
         }
     }
 

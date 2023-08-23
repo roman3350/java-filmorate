@@ -48,14 +48,45 @@ public class FilmDbStorage implements FilmStorage {
 
         // обрабатываем результат выполнения запроса
         if (userRows.next()) {
-            Film film = new Film(
-                    userRows.getLong("id"),
-                    userRows.getString("name"),
-                    userRows.getString("description"),
-                    userRows.getDate("RELEASE_DATE").toLocalDate(),
-                    userRows.getInt("duration"),
-                    new MPA(userRows.getLong("mpa_id"), userRows.getString("mpa_name")),
-                    new Genre(userRows.getLong("genre_id"), userRows.getString("genre_name")));
+            Film film;
+            if (userRows.getLong("mpa_id") == 0 && userRows.getLong("genre_id") == 0) {
+
+                film = Film.builder()
+                        .id(userRows.getLong("id"))
+                        .name(userRows.getString("name"))
+                        .description(userRows.getString("description"))
+                        .releaseDate(userRows.getDate("RELEASE_DATE").toLocalDate())
+                        .duration(userRows.getInt("duration"))
+                        .build();
+            } else if (userRows.getLong("mpa_id") == 0) {
+                film = Film.builder()
+                        .id(userRows.getLong("id"))
+                        .name(userRows.getString("name"))
+                        .description(userRows.getString("description"))
+                        .releaseDate(userRows.getDate("RELEASE_DATE").toLocalDate())
+                        .duration(userRows.getInt("duration"))
+                        .genres(new Genre(userRows.getLong("genre_id"), userRows.getString("genre_name")))
+                        .build();
+            } else if (userRows.getLong("genre_id") == 0) {
+                film = Film.builder()
+                        .id(userRows.getLong("id"))
+                        .name(userRows.getString("name"))
+                        .description(userRows.getString("description"))
+                        .releaseDate(userRows.getDate("RELEASE_DATE").toLocalDate())
+                        .duration(userRows.getInt("duration"))
+                        .mpa(new MPA(userRows.getLong("mpa_id"), userRows.getString("mpa_name")))
+                        .build();
+            } else {
+                film = Film.builder()
+                        .id(userRows.getLong("id"))
+                        .name(userRows.getString("name"))
+                        .description(userRows.getString("description"))
+                        .releaseDate(userRows.getDate("RELEASE_DATE").toLocalDate())
+                        .duration(userRows.getInt("duration"))
+                        .mpa(new MPA(userRows.getLong("mpa_id"), userRows.getString("mpa_name")))
+                        .genres(new Genre(userRows.getLong("genre_id"), userRows.getString("genre_name")))
+                        .build();
+            }
 
             log.info("Найден фильм: {} {}", film.getId(), film.getName());
 
@@ -80,14 +111,14 @@ public class FilmDbStorage implements FilmStorage {
             stmt.setDate(3, Date.valueOf(film.getReleaseDate()));
             stmt.setInt(4, film.getDuration());
             if (film.getMpa() == null) {
-                stmt.setNull(5, Types.INTEGER);
+                stmt.setNull(5, Types.NULL);
             } else {
                 stmt.setLong(5, film.getMpa().getId());
             }
-            if (film.getGenre() == null) {
-                stmt.setNull(6, Types.INTEGER);
+            if (film.getGenres() == null) {
+                stmt.setNull(6, Types.NULL);
             } else {
-                stmt.setLong(6, film.getGenre().getId());
+                stmt.setLong(6, film.getGenres().getId());
             }
             return stmt;
         }, keyHolder);
@@ -106,7 +137,7 @@ public class FilmDbStorage implements FilmStorage {
         String sqlQuery = "update films set " +
                 "name = ?, description = ?, RELEASE_DATE = ?, duration = ?, mpa_id = ?, genre_id = ? " +
                 "where id = ?";
-        if (film.getMpa() == null && film.getGenre() == null) {
+        if (film.getMpa() == null && film.getGenres() == null) {
             jdbcTemplate.update(sqlQuery
                     , film.getName()
                     , film.getDescription()
@@ -122,9 +153,9 @@ public class FilmDbStorage implements FilmStorage {
                     , Date.valueOf(film.getReleaseDate())
                     , film.getDuration()
                     , null
-                    , film.getGenre().getId()
+                    , film.getGenres().getId()
                     , film.getId());
-        } else if (film.getGenre() == null) {
+        } else if (film.getGenres() == null) {
             jdbcTemplate.update(sqlQuery
                     , film.getName()
                     , film.getDescription()
@@ -140,7 +171,7 @@ public class FilmDbStorage implements FilmStorage {
                     , Date.valueOf(film.getReleaseDate())
                     , film.getDuration()
                     , film.getMpa().getId()
-                    , film.getGenre().getId()
+                    , film.getGenres().getId()
                     , film.getId());
         }
         log.info("Пользователь обновлен");
@@ -172,7 +203,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Film deleteLike(Long filmId, Long userId){
+    public Film deleteLike(Long filmId, Long userId) {
         log.info("Запрос на удаление лайка");
         String sqlQuery = String.format("SELECT EXISTS (SELECT * FROM FILM_LIKES " +
                 "WHERE USER_ID = %d AND FILM_ID = %d);", userId, filmId);
@@ -184,7 +215,7 @@ public class FilmDbStorage implements FilmStorage {
         return findFilmById(filmId).get();
     }
 
-    public Collection<Film> getFilmQuantityLike(int count){
+    public Collection<Film> getFilmQuantityLike(int count) {
         log.info("Запрос на вывод популярных фильмов");
         String sqlQuery = String.format("SELECT f.id, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, " +
                 "f.DURATION, f.MPA_ID, m.mpa_NAME, f.GENRE_ID, g.genre_NAME " +
@@ -195,19 +226,47 @@ public class FilmDbStorage implements FilmStorage {
                 "FROM FILM_LIKES " +
                 "GROUP BY FILM_ID " +
                 "ORDER BY COUNT(FILM_ID)) " +
-                "LIMIT(%d)",count);
+                "LIMIT(%d)", count);
         return jdbcTemplate.query(sqlQuery, this::mapRowToEmployee);
     }
 
     private Film mapRowToEmployee(ResultSet rs, int rowNum) throws SQLException {
-        return Film.builder()
-                .id(rs.getLong("id"))
-                .name(rs.getString("NAME"))
-                .description(rs.getString("DESCRIPTION"))
-                .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
-                .duration(rs.getInt("DURATION"))
-                .mpa(new MPA(rs.getLong("MPA_ID"), rs.getString("mpa_NAME")))
-                .genre(new Genre(rs.getLong("GENRE_ID"),rs.getString("genre_NAME")))
-                .build();
+        if (rs.getLong("mpa_id") == 0 && rs.getLong("genre_id") == 0) {
+            return Film.builder()
+                    .id(rs.getLong("id"))
+                    .name(rs.getString("NAME"))
+                    .description(rs.getString("DESCRIPTION"))
+                    .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
+                    .duration(rs.getInt("DURATION"))
+                    .build();
+        } else if (rs.getLong("mpa_id") == 0) {
+            return Film.builder()
+                    .id(rs.getLong("id"))
+                    .name(rs.getString("NAME"))
+                    .description(rs.getString("DESCRIPTION"))
+                    .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
+                    .duration(rs.getInt("DURATION"))
+                    .genres(new Genre(rs.getLong("GENRE_ID"), rs.getString("genre_NAME")))
+                    .build();
+        } else if (rs.getLong("genre_id") == 0) {
+            return Film.builder()
+                    .id(rs.getLong("id"))
+                    .name(rs.getString("NAME"))
+                    .description(rs.getString("DESCRIPTION"))
+                    .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
+                    .duration(rs.getInt("DURATION"))
+                    .mpa(new MPA(rs.getLong("MPA_ID"), rs.getString("mpa_NAME")))
+                    .build();
+        } else {
+            return Film.builder()
+                    .id(rs.getLong("id"))
+                    .name(rs.getString("NAME"))
+                    .description(rs.getString("DESCRIPTION"))
+                    .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
+                    .duration(rs.getInt("DURATION"))
+                    .mpa(new MPA(rs.getLong("MPA_ID"), rs.getString("mpa_NAME")))
+                    .genres(new Genre(rs.getLong("GENRE_ID"), rs.getString("genre_NAME")))
+                    .build();
+        }
     }
 }
