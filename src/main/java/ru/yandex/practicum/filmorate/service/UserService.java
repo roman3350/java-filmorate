@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -56,8 +56,8 @@ public class UserService {
      * @param id id пользователя
      * @return пользователь
      */
-    public User findUserById(@PathVariable Long id) {
-        return userStorage.findUserById(id);
+    public User findUserById(Long id) {
+        return userStorage.findUserById(id).get();
     }
 
     /**
@@ -67,11 +67,12 @@ public class UserService {
      * @param friendId id друга
      * @return добавленный друг
      */
-    public User addFriend(Long id, Long friendId) {
-        checkUserExists(friendId, userStorage);
-        userStorage.findUserById(id).getFriends().add(friendId);
-        userStorage.findUserById(friendId).getFriends().add(id);
-        return userStorage.findUserById(friendId);
+    public User requestToFriend(Long id, Long friendId) {
+        return userStorage.requestToFriend(id, friendId);
+    }
+
+    public User confirmFriend(Long id, Long friendId) {
+        return userStorage.confirmFriend(id, friendId);
     }
 
     /**
@@ -82,10 +83,7 @@ public class UserService {
      * @return друг удаленный из друзей
      */
     public User deleteFriend(Long id, Long friendId) {
-        checkUserExists(friendId, userStorage);
-        userStorage.findUserById(id).getFriends().remove(friendId);
-        userStorage.findUserById(friendId).getFriends().remove(id);
-        return userStorage.findUserById(friendId);
+        return userStorage.deleteFriend(id, friendId);
     }
 
     /**
@@ -95,16 +93,8 @@ public class UserService {
      * @param friendId id пользователя с которым надо вывести общих друзей
      * @return общие друзья
      */
-    public List<User> commonFriends(Long id, Long friendId) {
-        return userStorage
-                .findUserById(id)
-                .getFriends()
-                .stream()
-                .filter(userStorage
-                        .findUserById(friendId)
-                        .getFriends()::contains)
-                .map(userStorage::findUserById)
-                .collect(Collectors.toList());
+    public Collection<User> commonFriends(Long id, Long friendId) {
+        return userStorage.commonFriends(id, friendId);
     }
 
     /**
@@ -113,12 +103,7 @@ public class UserService {
      * @param id id пользователя
      * @return друзья
      */
-    public List<User> getFriends(Long id) {
-        return userStorage
-                .findUserById(id)
-                .getFriends()
-                .stream()
-                .map(userStorage::findUserById)
-                .collect(Collectors.toList());
+    public Collection<User> getFriends(Long id) {
+        return userStorage.getFriends(id);
     }
 }

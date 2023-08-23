@@ -5,9 +5,11 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
+import javax.swing.text.html.Option;
 import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/films")
@@ -20,11 +22,24 @@ public class FilmController {
     }
 
     /**
+     * Принимает из пути id и выводит фильм по этому id
+     *
+     * @param id id фильма
+     * @return фильм по id
+     */
+
+    @GetMapping("/{id}")
+    public Optional<Film> findFilmById(@PathVariable Long id) {
+        return filmService.findFilmById(id);
+    }
+
+    /**
      * Принимает из тела запроса фильм и добавляет его
      *
      * @param film объект фильма
      * @return добавленный объект фильма
      */
+
     @PostMapping
     public Film create(@Valid @RequestBody Film film) {
         return filmService.create(film);
@@ -36,6 +51,7 @@ public class FilmController {
      * @param film объект фильма
      * @return обновленный фильм
      */
+
     @PutMapping
     public Film update(@Valid @RequestBody Film film) {
         return filmService.update(film);
@@ -46,20 +62,10 @@ public class FilmController {
      *
      * @return список всех фильмов
      */
+
     @GetMapping
     public Collection<Film> findAll() {
         return filmService.findAll();
-    }
-
-    /**
-     * Принимает из пути id и выводит фильм по этому id
-     *
-     * @param id id фильма
-     * @return фильм по id
-     */
-    @GetMapping("/{id}")
-    public Film findById(@PathVariable Long id) {
-        return filmService.findFilmById(id);
     }
 
     /**
@@ -69,6 +75,7 @@ public class FilmController {
      * @param userId id пользователя
      * @return лайкнутый фильм
      */
+
     @PutMapping("/{id}/like/{userId}")
     public Film addLike(@PathVariable Long id, @PathVariable Long userId) {
         return filmService.addLike(id, userId);
@@ -81,6 +88,7 @@ public class FilmController {
      * @param userId id пользователя
      * @return фильм с которого удалили лайк
      */
+
     @DeleteMapping("/{id}/like/{userId}")
     public Film deleteLike(@PathVariable Long id, @PathVariable Long userId) {
         return filmService.deleteLike(id, userId);
@@ -92,8 +100,9 @@ public class FilmController {
      * @param count необязательный параметр количества фильмов на вывод
      * @return фильмы по популярности
      */
+
     @GetMapping("/popular")
-    public List<Film> getPopularFilm(@RequestParam(defaultValue = "10", required = false) Integer count) {
+    public Collection<Film> getPopularFilm(@RequestParam(defaultValue = "10", required = false) Integer count) {
         return filmService.getFilmQuantityLike(count);
     }
 }

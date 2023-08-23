@@ -1,3 +1,4 @@
+/*
 package ru.yandex.practicum.filmorate.storage;
 
 
@@ -5,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,12 +20,14 @@ public class InMemoryUserStorage implements UserStorage {
     private final Map<Long, User> users = new HashMap<>();
     private long id;
 
-    /**
+    */
+/**
      * Проверяет данные, при успешной проверке добавляет объект пользователя в мапу
      *
      * @param user объект пользователя с данными
      * @return объект добавленного пользователя
-     */
+     *//*
+
     public User create(User user) {
         log.info("Запрос на создания пользователя");
         validationUser(user);
@@ -34,12 +37,14 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
-    /**
+    */
+/**
      * Проверяет данные, при успешной проверке обновляет пользователя
      *
      * @param user объект пользователя с данными
      * @return обновленный объект пользователя
-     */
+     *//*
+
     public User update(User user) {
         if (!users.containsKey(user.getId())) {
             log.warn("Пользователя с ID {} не найден", user.getId());
@@ -51,21 +56,25 @@ public class InMemoryUserStorage implements UserStorage {
         return user;
     }
 
-    /**
+    */
+/**
      * Возвращает всех добавленных пользователей
      *
      * @return добавленные пользователи
-     */
+     *//*
+
     public Collection<User> findAll() {
         return users.values();
     }
 
-    /**
+    */
+/**
      * поиск пользователя по id
      *
      * @param id id пользователя
      * @return пользователь
-     */
+     *//*
+
     public User findUserById(Long id) {
         if (!users.containsKey(id)) {
             log.warn("Пользователя с ID {} не найден", id);
@@ -74,3 +83,4 @@ public class InMemoryUserStorage implements UserStorage {
         return users.get(id);
     }
 }
+*/

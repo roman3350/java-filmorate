@@ -5,9 +5,11 @@ import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Slf4j
 public class Validation {
@@ -49,9 +51,22 @@ public class Validation {
         }
     }
 
-    public static void checkUserExists(Long id, UserStorage userStorage) {
-        if (userStorage.findUserById(id) == null) {
+    public static void checkUserExists(Optional<User> user) {
+        if (user.isEmpty()) {
             throw new UserNotFoundException("Друга с таким Id нет");
         }
     }
+
+    public static void checkFriendExists(Boolean confirmFriend) {
+        if (!confirmFriend) {
+            throw new UserNotFoundException("Запрос на добавления в друзья нет, либо он уже в друзьях");
+        }
+    }
+
+    public static void checkUserLike(Boolean isUserLikeFilm) {
+        if (!isUserLikeFilm) {
+            throw new UserNotFoundException("Пользователь не лайкал фильм");
+        }
+    }
+
 }

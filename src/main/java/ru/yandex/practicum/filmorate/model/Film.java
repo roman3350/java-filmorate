@@ -20,5 +20,16 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
-    private final Set<Long> idLike = new HashSet<>();
+    private MPA mpa;
+    private Genre genre;
+
+    public Film(Long id, String name, String description, LocalDate releaseDate, int duration, MPA mpa, Genre genre) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.releaseDate = releaseDate;
+        this.duration = duration;
+        this.mpa = mpa;
+        this.genre = genre;
+    }
 }

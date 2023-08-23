@@ -1,3 +1,4 @@
+/*
 package ru.yandex.practicum.filmorate.storage;
 
 
@@ -5,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
+import ru.yandex.practicum.filmorate.dao.FilmStorage;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,12 +20,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     private Map<Long, Film> films = new HashMap<>();
     private long id;
 
-    /**
+    */
+/**
      * Проверяет данные, при успешной проверке добавляет объект фильма в мапу
      *
      * @param film объект фильма
      * @return добавленный объект фильма
-     */
+     *//*
+
     public Film create(Film film) {
         log.info("Запрос на добавления фильма");
         validationFilm(film);
@@ -35,12 +38,14 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
 
-    /**
+    */
+/**
      * Проверяет данные, при успешной проверке обновляет фильм
      *
      * @param film объект фильма
      * @return обновленный объект фильма
-     */
+     *//*
+
     public Film update(Film film) {
         if (!films.containsKey(film.getId())) {
             log.warn("Фильм с ID {} не найден", film.getId());
@@ -52,21 +57,25 @@ public class InMemoryFilmStorage implements FilmStorage {
         return film;
     }
 
-    /**
+    */
+/**
      * Возвращает все добавленные фильмы
      *
      * @return добавленные фильмы
-     */
+     *//*
+
     public Collection<Film> findAll() {
         return films.values();
     }
 
-    /**
+    */
+/**
      * поиск фильма по id
      *
      * @param id id фильма
      * @return фильм
-     */
+     *//*
+
     public Film findById(Long id) {
         if (!films.containsKey(id)) {
             log.warn("Фильм с ID {} не найден", id);
@@ -75,3 +84,4 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.get(id);
     }
 }
+*/
