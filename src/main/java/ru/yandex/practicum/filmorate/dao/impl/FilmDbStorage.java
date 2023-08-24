@@ -19,6 +19,7 @@ import java.sql.*;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ru.yandex.practicum.filmorate.utilites.Validation.*;
 
@@ -61,7 +62,10 @@ public class FilmDbStorage implements FilmStorage {
                     "LEFT JOIN GENRE AS g ON fg.GENRE_ID  = g.GENRE_ID " +
                     "WHERE fg.FILM_ID = ? " +
                     "ORDER BY g.genre_id DESC";
-            film.setGenres(Set.copyOf(jdbcTemplate.query(sqlQueryGenre, this::mapRowToGenre, id)));
+            film.setGenres(Set.copyOf(jdbcTemplate.query(sqlQueryGenre, this::mapRowToGenre, id))
+                    .stream()
+                    .sorted((g0,g1)-> (int) (g0.getId()-g1.getId()))
+                    .collect(Collectors.toSet()));
             log.info("Найден фильм: {} {}", film.getId(), film.getName());
             return Optional.of(film);
         } else {
@@ -239,7 +243,12 @@ public class FilmDbStorage implements FilmStorage {
                     .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
                     .duration(rs.getInt("DURATION"))
                     .mpa(new MPA(rs.getLong("MPA_ID"), rs.getString("mpa_NAME")))
-                    .genres(Set.copyOf(jdbcTemplate.query(sqlQueryGenre, this::mapRowToGenre, rs.getLong("id"))))
+                    .genres(Set.copyOf(jdbcTemplate.query(sqlQueryGenre,
+                            this::mapRowToGenre,
+                            rs.getLong("id")))
+                            .stream()
+                    .sorted((g0,g1)-> (int) (g0.getId()-g1.getId()))
+                    .collect(Collectors.toSet()))
                     .build();
         }
     }
