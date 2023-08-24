@@ -64,7 +64,7 @@ public class FilmDbStorage implements FilmStorage {
                     "ORDER BY g.genre_id DESC";
             film.setGenres(Set.copyOf(jdbcTemplate.query(sqlQueryGenre, this::mapRowToGenre, id))
                     .stream()
-                    .sorted((g0,g1)-> (int) (g0.getId()-g1.getId()))
+                    .sorted((g0, g1) -> (int) (g0.getId() - g1.getId()))
                     .collect(Collectors.toSet()));
             log.info("Найден фильм: {} {}", film.getId(), film.getName());
             return Optional.of(film);
@@ -244,11 +244,11 @@ public class FilmDbStorage implements FilmStorage {
                     .duration(rs.getInt("DURATION"))
                     .mpa(new MPA(rs.getLong("MPA_ID"), rs.getString("mpa_NAME")))
                     .genres(Set.copyOf(jdbcTemplate.query(sqlQueryGenre,
-                            this::mapRowToGenre,
-                            rs.getLong("id")))
+                                    this::mapRowToGenre,
+                                    rs.getLong("id")))
                             .stream()
-                    .sorted((g0,g1)-> (int) (g0.getId()-g1.getId()))
-                    .collect(Collectors.toSet()))
+                            .sorted((g0, g1) -> (int) (g0.getId() - g1.getId()))
+                            .collect(Collectors.toSet()))
                     .build();
         }
     }
