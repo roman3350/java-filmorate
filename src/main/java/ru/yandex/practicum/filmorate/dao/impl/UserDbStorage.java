@@ -123,9 +123,9 @@ public class UserDbStorage implements UserStorage {
         sqlQuery = "update friends set " +
                 "status = true " +
                 "where user_id = ? and friend_id = ?";
-        jdbcTemplate.update(sqlQuery
-                , sendUserId
-                , confirmUserId);
+        jdbcTemplate.update(sqlQuery,
+                sendUserId,
+                confirmUserId);
         log.info("Пользователь добавлен в друзья");
         return findUserById(sendUserId).get();
     }
