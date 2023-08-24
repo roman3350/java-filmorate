@@ -1,12 +1,11 @@
 package ru.yandex.practicum.filmorate.utilites;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.dao.UserStorage;
-import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -54,6 +53,24 @@ public class Validation {
     public static void checkUserExists(Optional<User> user) {
         if (user.isEmpty()) {
             throw new UserNotFoundException("Пользователя с таким Id нет");
+        }
+    }
+
+    public static void checkFilmExists(Optional<Film> film) {
+        if (film.isEmpty()) {
+            throw new FilmNotFoundException("Фильма с таким Id нет");
+        }
+    }
+
+    public static void checkGenreExists(Optional<Genre> genre) {
+        if (genre.isEmpty()) {
+            throw new GenreNotFoundException("Жанра с таким Id нет");
+        }
+    }
+
+    public static void checkMPAExists(Optional<MPA> mpa) {
+        if (mpa.isEmpty()) {
+            throw new MPANotFoundException("Рейтинга с таким Id нет");
         }
     }
 

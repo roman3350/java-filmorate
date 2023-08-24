@@ -10,6 +10,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
+import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -20,6 +21,7 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import java.sql.*;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.Set;
 
 import static ru.yandex.practicum.filmorate.utilites.Validation.*;
 
@@ -40,11 +42,13 @@ public class FilmDbStorage implements FilmStorage {
     public Optional<Film> findFilmById(Long id) {
         // выполняем запрос к базе данных.
         SqlRowSet userRows = jdbcTemplate.queryForRowSet("SELECT " +
-                "f.id, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, f.MPA_ID, m.mpa_NAME, f.GENRE_ID, g.genre_NAME " +
+                "f.id, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, " +
+                "f.MPA_ID, m.mpa_NAME, ge.GENRE_ID, ge.genre_NAME " +
                 "FROM FILMS AS f " +
                 "LEFT JOIN MPA AS m ON f.MPA_ID = m.MPA_ID " +
-                "LEFT JOIN GENRE AS g ON f.GENRE_ID = g.GENRE_ID " +
-                "WHERE f.ID = ?;", id);
+                "LEFT JOIN FILM_GENRE AS g ON f.id = g.FILM_ID " +
+                "LEFT JOIN GENRE AS ge ON g.GENRE_ID = ge.GENRE_ID " +
+                "WHERE f.ID = ?", id);
 
         // обрабатываем результат выполнения запроса
         if (userRows.next()) {
@@ -57,6 +61,7 @@ public class FilmDbStorage implements FilmStorage {
                         .description(userRows.getString("description"))
                         .releaseDate(userRows.getDate("RELEASE_DATE").toLocalDate())
                         .duration(userRows.getInt("duration"))
+                        .genres(Set.of())
                         .build();
             } else if (userRows.getLong("mpa_id") == 0) {
                 film = Film.builder()
@@ -65,7 +70,7 @@ public class FilmDbStorage implements FilmStorage {
                         .description(userRows.getString("description"))
                         .releaseDate(userRows.getDate("RELEASE_DATE").toLocalDate())
                         .duration(userRows.getInt("duration"))
-                        .genres(new Genre(userRows.getLong("genre_id"), userRows.getString("genre_name")))
+                        .genres(Set.of(new Genre(userRows.getLong("genre_id"), userRows.getString("genre_name"))))
                         .build();
             } else if (userRows.getLong("genre_id") == 0) {
                 film = Film.builder()
@@ -75,6 +80,7 @@ public class FilmDbStorage implements FilmStorage {
                         .releaseDate(userRows.getDate("RELEASE_DATE").toLocalDate())
                         .duration(userRows.getInt("duration"))
                         .mpa(new MPA(userRows.getLong("mpa_id"), userRows.getString("mpa_name")))
+                        .genres(Set.of())
                         .build();
             } else {
                 film = Film.builder()
@@ -84,15 +90,15 @@ public class FilmDbStorage implements FilmStorage {
                         .releaseDate(userRows.getDate("RELEASE_DATE").toLocalDate())
                         .duration(userRows.getInt("duration"))
                         .mpa(new MPA(userRows.getLong("mpa_id"), userRows.getString("mpa_name")))
-                        .genres(new Genre(userRows.getLong("genre_id"), userRows.getString("genre_name")))
+                        .genres(Set.of(new Genre(userRows.getLong("genre_id"), userRows.getString("genre_name"))))
                         .build();
             }
 
             log.info("Найден фильм: {} {}", film.getId(), film.getName());
-
             return Optional.of(film);
         } else {
             log.info("фильм с идентификатором {} не найден.", id);
+            checkFilmExists(Optional.empty());
             return Optional.empty();
         }
     }
@@ -101,8 +107,8 @@ public class FilmDbStorage implements FilmStorage {
     public Film create(Film film) {
         log.info("Запрос на создания фильма");
         validationFilm(film);
-        String sqlQuery = "insert into films(name, description, RELEASE_DATE, duration, mpa_id, genre_id) " +
-                "values (?, ?, ?, ?, ?, ?)";
+        String sqlQuery = "insert into films(name, description, RELEASE_DATE, duration, mpa_id) " +
+                "values (?, ?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
@@ -115,53 +121,40 @@ public class FilmDbStorage implements FilmStorage {
             } else {
                 stmt.setLong(5, film.getMpa().getId());
             }
-            if (film.getGenres() == null) {
-                stmt.setNull(6, Types.NULL);
-            } else {
-                stmt.setLong(6, film.getGenres().getId());
-            }
             return stmt;
         }, keyHolder);
+        if (film.getGenres() != null) {
+            if (!film.getGenres().isEmpty()) {
+                String sqlQueryGenre = "insert into film_genre(film_id, genre_id) " +
+                        "values (?, ?)";
+                for (Genre genre : film.getGenres()) {
+                    jdbcTemplate.update(sqlQuery,
+                            keyHolder.getKey().longValue(),
+                            genre.getId());
+                }
+            }
+        }
         log.info("Фильм добавлен");
         return findFilmById(keyHolder.getKey().longValue()).get();
     }
 
     @Override
     public Film update(Film film) {
-        log.info("Запрос на обновление пользователя");
+        log.info("Запрос на обновление фильма");
         if (findFilmById(film.getId()).isEmpty()) {
-            log.warn("Пользователя с ID {} не найден", film.getId());
-            throw new UserNotFoundException("Пользователя с таким ID нет");
+            log.warn("Фильм с ID {} не найден", film.getId());
+            throw new FilmNotFoundException("Фильм с таким ID нет");
         }
         validationFilm(film);
         String sqlQuery = "update films set " +
-                "name = ?, description = ?, RELEASE_DATE = ?, duration = ?, mpa_id = ?, genre_id = ? " +
+                "name = ?, description = ?, RELEASE_DATE = ?, duration = ?, mpa_id = ?" +
                 "where id = ?";
-        if (film.getMpa() == null && film.getGenres() == null) {
+        if (film.getMpa() == null) {
             jdbcTemplate.update(sqlQuery
                     , film.getName()
                     , film.getDescription()
                     , Date.valueOf(film.getReleaseDate())
                     , film.getDuration()
-                    , null
-                    , null
-                    , film.getId());
-        } else if (film.getMpa() == null) {
-            jdbcTemplate.update(sqlQuery
-                    , film.getName()
-                    , film.getDescription()
-                    , Date.valueOf(film.getReleaseDate())
-                    , film.getDuration()
-                    , null
-                    , film.getGenres().getId()
-                    , film.getId());
-        } else if (film.getGenres() == null) {
-            jdbcTemplate.update(sqlQuery
-                    , film.getName()
-                    , film.getDescription()
-                    , Date.valueOf(film.getReleaseDate())
-                    , film.getDuration()
-                    , film.getMpa().getId()
                     , null
                     , film.getId());
         } else {
@@ -171,8 +164,22 @@ public class FilmDbStorage implements FilmStorage {
                     , Date.valueOf(film.getReleaseDate())
                     , film.getDuration()
                     , film.getMpa().getId()
-                    , film.getGenres().getId()
                     , film.getId());
+        }
+        if (film.getGenres() != null) {
+            if (!film.getGenres().isEmpty()) {
+                String sqlQueryGenre = "insert into film_genre(film_id, genre_id) " +
+                        "values (?, ?)";
+                for (Genre genre : film.getGenres()) {
+                    jdbcTemplate.update(sqlQueryGenre,
+                            film.getId(),
+                            genre.getId());
+                }
+            } else {
+                String sqlQueryGenreDelete = "delete from film_genre where film_id = ? ";
+                jdbcTemplate.update(sqlQueryGenreDelete,
+                        film.getId());
+            }
         }
         log.info("Пользователь обновлен");
         return findFilmById(film.getId()).get();
@@ -182,10 +189,11 @@ public class FilmDbStorage implements FilmStorage {
         log.info("Запрос на вывод всех фильмов");
         String sqlQuery = "SELECT " +
                 "f.id, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, " +
-                "f.DURATION, f.MPA_ID, m.mpa_NAME, f.GENRE_ID, g.genre_NAME " +
+                "f.DURATION, f.MPA_ID, m.mpa_NAME, ge.GENRE_ID, ge.genre_NAME " +
                 "FROM FILMS AS f " +
                 "LEFT JOIN MPA AS m ON f.MPA_ID = m.MPA_ID " +
-                "LEFT JOIN GENRE AS g ON f.GENRE_ID = g.GENRE_ID";
+                "LEFT JOIN FILM_GENRE AS g ON f.id = g.FILM_ID " +
+                "LEFT JOIN GENRE AS ge ON g.GENRE_ID = ge.GENRE_ID ";
         return jdbcTemplate.query(sqlQuery, this::mapRowToEmployee);
     }
 
@@ -222,10 +230,9 @@ public class FilmDbStorage implements FilmStorage {
                 "FROM FILMS AS f " +
                 "LEFT JOIN MPA AS m ON f.MPA_ID = m.MPA_ID " +
                 "LEFT JOIN GENRE AS g ON f.GENRE_ID = g.GENRE_ID " +
-                "WHERE f.ID IN (SELECT FILM_ID " +
-                "FROM FILM_LIKES " +
-                "GROUP BY FILM_ID " +
-                "ORDER BY COUNT(FILM_ID)) " +
+                "LEFT JOIN FILM_LIKES AS fl ON f.id = fl.FILM_ID " +
+                "GROUP BY f.ID " +
+                "ORDER BY COUNT(fl.FILM_ID) DESC " +
                 "LIMIT(%d)", count);
         return jdbcTemplate.query(sqlQuery, this::mapRowToEmployee);
     }
@@ -238,6 +245,7 @@ public class FilmDbStorage implements FilmStorage {
                     .description(rs.getString("DESCRIPTION"))
                     .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
                     .duration(rs.getInt("DURATION"))
+                    .genres(Set.of())
                     .build();
         } else if (rs.getLong("mpa_id") == 0) {
             return Film.builder()
@@ -246,7 +254,7 @@ public class FilmDbStorage implements FilmStorage {
                     .description(rs.getString("DESCRIPTION"))
                     .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
                     .duration(rs.getInt("DURATION"))
-                    .genres(new Genre(rs.getLong("GENRE_ID"), rs.getString("genre_NAME")))
+                    .genres(Set.of(new Genre(rs.getLong("GENRE_ID"), rs.getString("genre_NAME"))))
                     .build();
         } else if (rs.getLong("genre_id") == 0) {
             return Film.builder()
@@ -256,6 +264,7 @@ public class FilmDbStorage implements FilmStorage {
                     .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
                     .duration(rs.getInt("DURATION"))
                     .mpa(new MPA(rs.getLong("MPA_ID"), rs.getString("mpa_NAME")))
+                    .genres(Set.of())
                     .build();
         } else {
             return Film.builder()
@@ -265,7 +274,7 @@ public class FilmDbStorage implements FilmStorage {
                     .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
                     .duration(rs.getInt("DURATION"))
                     .mpa(new MPA(rs.getLong("MPA_ID"), rs.getString("mpa_NAME")))
-                    .genres(new Genre(rs.getLong("GENRE_ID"), rs.getString("genre_NAME")))
+                    .genres(Set.of(new Genre(rs.getLong("GENRE_ID"), rs.getString("genre_NAME"))))
                     .build();
         }
     }
