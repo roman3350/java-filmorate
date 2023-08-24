@@ -118,21 +118,21 @@ public class FilmDbStorage implements FilmStorage {
                 "name = ?, description = ?, RELEASE_DATE = ?, duration = ?, mpa_id = ?" +
                 "where id = ?";
         if (film.getMpa() == null) {
-            jdbcTemplate.update(sqlQuery
-                    , film.getName()
-                    , film.getDescription()
-                    , Date.valueOf(film.getReleaseDate())
-                    , film.getDuration()
-                    , null
-                    , film.getId());
+            jdbcTemplate.update(sqlQuery,
+                    film.getName(),
+                    film.getDescription(),
+                    Date.valueOf(film.getReleaseDate()),
+                    film.getDuration(),
+                    null,
+                    film.getId());
         } else {
-            jdbcTemplate.update(sqlQuery
-                    , film.getName()
-                    , film.getDescription()
-                    , Date.valueOf(film.getReleaseDate())
-                    , film.getDuration()
-                    , film.getMpa().getId()
-                    , film.getId());
+            jdbcTemplate.update(sqlQuery,
+                    film.getName(),
+                    film.getDescription(),
+                    Date.valueOf(film.getReleaseDate()),
+                    film.getDuration(),
+                    film.getMpa().getId(),
+                    film.getId());
         }
         if (film.getGenres() != null) {
             if (!film.getGenres().isEmpty()) {
