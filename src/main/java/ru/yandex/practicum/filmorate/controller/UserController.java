@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -105,7 +104,8 @@ public class UserController {
 
     /**
      * вывод общих друзей с пользователя
-     * @param id Id пользователя
+     *
+     * @param id      Id пользователя
      * @param otherId id пользователя с которым выводятся общие друзья
      * @return общие друзья
      */

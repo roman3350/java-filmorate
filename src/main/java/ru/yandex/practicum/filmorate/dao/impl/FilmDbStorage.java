@@ -11,12 +11,9 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.MPA;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.sql.*;
 import java.util.Collection;
@@ -99,7 +96,7 @@ public class FilmDbStorage implements FilmStorage {
                 String sqlQueryGenre = "insert into film_genre(film_id, genre_id) " +
                         "values (?, ?)";
                 for (Genre genre : film.getGenres()) {
-                    jdbcTemplate.update(sqlQuery,
+                    jdbcTemplate.update(sqlQueryGenre,
                             keyHolder.getKey().longValue(),
                             genre.getId());
                 }
@@ -200,11 +197,10 @@ public class FilmDbStorage implements FilmStorage {
 
     public Collection<Film> getFilmQuantityLike(int count) {
         log.info("Запрос на вывод популярных фильмов");
-        String sqlQuery = String.format("SELECT f.id, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, " +
-                "f.DURATION, f.MPA_ID, m.mpa_NAME, f.GENRE_ID, g.genre_NAME " +
+        String sqlQuery = String.format("SELECT " +
+                "f.id, f.NAME, f.DESCRIPTION, f.RELEASE_DATE, f.DURATION, f.MPA_ID, m.mpa_NAME " +
                 "FROM FILMS AS f " +
                 "LEFT JOIN MPA AS m ON f.MPA_ID = m.MPA_ID " +
-                "LEFT JOIN GENRE AS g ON f.GENRE_ID = g.GENRE_ID " +
                 "LEFT JOIN FILM_LIKES AS fl ON f.id = fl.FILM_ID " +
                 "GROUP BY f.ID " +
                 "ORDER BY COUNT(fl.FILM_ID) DESC " +
@@ -220,32 +216,19 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     private Film mapRowToEmployee(ResultSet rs, int rowNum) throws SQLException {
-        if (rs.getLong("mpa_id") == 0 && rs.getLong("genre_id") == 0) {
+        String sqlQueryGenre = "SELECT " +
+                "g.genre_id, g.GENRE_NAME " +
+                "FROM FILM_GENRE AS fg " +
+                "LEFT JOIN GENRE AS g ON fg.GENRE_ID  = g.GENRE_ID " +
+                "WHERE fg.FILM_ID = ? " +
+                "ORDER BY g.genre_id DESC";
+        if (rs.getLong("mpa_id") == 0) {
             return Film.builder()
                     .id(rs.getLong("id"))
                     .name(rs.getString("NAME"))
                     .description(rs.getString("DESCRIPTION"))
                     .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
                     .duration(rs.getInt("DURATION"))
-                    .genres(Set.of())
-                    .build();
-        } else if (rs.getLong("mpa_id") == 0) {
-            return Film.builder()
-                    .id(rs.getLong("id"))
-                    .name(rs.getString("NAME"))
-                    .description(rs.getString("DESCRIPTION"))
-                    .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
-                    .duration(rs.getInt("DURATION"))
-                    .genres(Set.of(new Genre(rs.getLong("GENRE_ID"), rs.getString("genre_NAME"))))
-                    .build();
-        } else if (rs.getLong("genre_id") == 0) {
-            return Film.builder()
-                    .id(rs.getLong("id"))
-                    .name(rs.getString("NAME"))
-                    .description(rs.getString("DESCRIPTION"))
-                    .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
-                    .duration(rs.getInt("DURATION"))
-                    .mpa(new MPA(rs.getLong("MPA_ID"), rs.getString("mpa_NAME")))
                     .genres(Set.of())
                     .build();
         } else {
@@ -256,7 +239,7 @@ public class FilmDbStorage implements FilmStorage {
                     .releaseDate(rs.getDate("RELEASE_DATE").toLocalDate())
                     .duration(rs.getInt("DURATION"))
                     .mpa(new MPA(rs.getLong("MPA_ID"), rs.getString("mpa_NAME")))
-                    .genres(Set.of(new Genre(rs.getLong("GENRE_ID"), rs.getString("genre_NAME"))))
+                    .genres(Set.copyOf(jdbcTemplate.query(sqlQueryGenre, this::mapRowToGenre, rs.getLong("id"))))
                     .build();
         }
     }

@@ -7,12 +7,7 @@ import ru.yandex.practicum.filmorate.dao.FilmStorage;
 import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import static ru.yandex.practicum.filmorate.utilites.Validation.checkUserExists;
 
 @Service
 public class FilmService {

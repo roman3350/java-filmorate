@@ -1,13 +1,10 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Data;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -24,6 +21,6 @@ public class Film {
     @Positive
     private int duration;
     private MPA mpa;
-    private Set<Genre> genres =  new TreeSet<>();
+    private Set<Genre> genres = new TreeSet<>();
 
 }
