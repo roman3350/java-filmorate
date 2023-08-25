@@ -1,9 +1,10 @@
-/*
 package ru.yandex.practicum.filmorate;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.UserController;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
@@ -18,12 +19,12 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 @SpringBootTest
+@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserTest {
     UserController userController;
     @Autowired
     UserService userService;
-    @Autowired
-    UserStorage userStorage;
 
     @BeforeEach
     void createController() {
@@ -39,7 +40,7 @@ public class UserTest {
                 .birthday(LocalDate.of(1946, 8, 20))
                 .build();
         User userSave = userController.create(user);
-        assertEquals(user, userSave);
+        assertEquals(userController.findUserById(6L), userSave);
     }
 
     @Test
@@ -127,7 +128,7 @@ public class UserTest {
                 .birthday(LocalDate.now().minus(1, ChronoUnit.DAYS))
                 .build();
         User userSave = userController.create(user);
-        assertEquals(user, userSave);
+        assertEquals(userController.findUserById(4L), userSave);
     }
 
     @Test
@@ -179,4 +180,3 @@ public class UserTest {
     }
 
 }
-*/

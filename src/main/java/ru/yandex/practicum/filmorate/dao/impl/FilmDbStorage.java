@@ -70,8 +70,7 @@ public class FilmDbStorage implements FilmStorage {
             return Optional.of(film);
         } else {
             log.info("фильм с идентификатором {} не найден.", id);
-            checkFilmExists(Optional.empty());
-            return Optional.empty();
+            throw new FilmNotFoundException("Фильма с таким Id нет");
         }
     }
 
@@ -106,7 +105,7 @@ public class FilmDbStorage implements FilmStorage {
                 }
             }
         }
-        log.info("Фильм добавлен");
+        log.info("Фильм c ID {} и название {} добавлен", keyHolder.getKey().longValue(), film.getName());
         return findFilmById(keyHolder.getKey().longValue()).get();
     }
 
@@ -157,7 +156,7 @@ public class FilmDbStorage implements FilmStorage {
                         film.getId());
             }
         }
-        log.info("Пользователь обновлен");
+        log.info("Фильм с ID {} и названием {} обновлен", film.getId(), film.getName());
         return findFilmById(film.getId()).get();
     }
 
@@ -182,7 +181,7 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlQuery,
                 filmId,
                 userId);
-        log.info("Лайк поставлен");
+        log.info("Лайк пользователем с ID {}, фильму с ID {} поставлен", userId, filmId);
         return findFilmById(filmId).get();
     }
 
@@ -195,7 +194,7 @@ public class FilmDbStorage implements FilmStorage {
         checkUserExists(userStorage.findUserById(userId));
         sqlQuery = "delete from FILM_LIKES where user_id = ? and FILM_ID = ?";
         jdbcTemplate.update(sqlQuery, userId, filmId);
-        log.info("Пользователь удален из друзей");
+        log.info("Лайк пользователя с ID {}, фильму с ID {} удален", userId, filmId);
         return findFilmById(filmId).get();
     }
 

@@ -69,7 +69,7 @@ public class UserDbStorage implements UserStorage {
             stmt.setDate(4, Date.valueOf(user.getBirthday()));
             return stmt;
         }, keyHolder);
-        log.info("Пользователь добавлен");
+        log.info("Пользователь с ID {} и почтой {} добавлен", keyHolder.getKey().longValue(), user.getEmail());
         return findUserById(keyHolder.getKey().longValue()).get();
     }
 
@@ -90,7 +90,7 @@ public class UserDbStorage implements UserStorage {
                 user.getName(),
                 Date.valueOf(user.getBirthday()),
                 user.getId());
-        log.info("Пользователь обновлен");
+        log.info("Пользователь с ID {} и почтой {} обновлен", user.getId(), user.getEmail());
         return findUserById(user.getId()).get();
     }
 
@@ -110,7 +110,7 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(sqlQuery,
                 id,
                 friendId);
-        log.info("Запрос отпарвлен");
+        log.info("Запрос в дурзья от пользователя с ID {} пользователю с ID {} отпарвлен", id, friendId);
         return findUserById(friendId).get();
     }
 
@@ -126,7 +126,9 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(sqlQuery,
                 sendUserId,
                 confirmUserId);
-        log.info("Пользователь добавлен в друзья");
+        log.info("Пользователь с ID {} подтвердил заявку в друзья от пользователя с ID {}",
+                confirmUserId,
+                sendUserId);
         return findUserById(sendUserId).get();
     }
 
@@ -138,7 +140,7 @@ public class UserDbStorage implements UserStorage {
         checkFriendExists(jdbcTemplate.queryForObject(sqlQuery, Boolean.class));
         sqlQuery = "delete from friends where user_id = ? and friend_id = ?";
         jdbcTemplate.update(sqlQuery, id, friendId);
-        log.info("Пользователь удален из друзей");
+        log.info("Пользователь с ID {} удален из друзей пользователя с ID {}", friendId, id);
         return findUserById(friendId).get();
     }
 

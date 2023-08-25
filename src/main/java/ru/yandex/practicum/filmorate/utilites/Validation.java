@@ -52,37 +52,29 @@ public class Validation {
 
     public static void checkUserExists(Optional<User> user) {
         if (user.isEmpty()) {
-            throw new UserNotFoundException("Пользователя с таким Id нет");
-        }
-    }
-
-    public static void checkFilmExists(Optional<Film> film) {
-        if (film.isEmpty()) {
-            throw new FilmNotFoundException("Фильма с таким Id нет");
+            log.warn("Пользователь не найден в БД");
+            throw new UserNotFoundException("Пользователя не найден");
         }
     }
 
     public static void checkGenreExists(Optional<Genre> genre) {
         if (genre.isEmpty()) {
-            throw new GenreNotFoundException("Жанра с таким Id нет");
+            log.warn("Жанр не найден в БД");
+            throw new GenreNotFoundException("Жанр не найден");
         }
     }
 
     public static void checkMPAExists(Optional<MPA> mpa) {
         if (mpa.isEmpty()) {
-            throw new MPANotFoundException("Рейтинга с таким Id нет");
+            log.warn("Рейтинг не найден в БД");
+            throw new MPANotFoundException("Рейтинга не найден");
         }
     }
 
     public static void checkFriendExists(Boolean confirmFriend) {
         if (!confirmFriend) {
+            log.warn("Пользотваель не найден, либо он уже добавлен в друзья");
             throw new UserNotFoundException("Запрос на добавления в друзья нет, либо он уже в друзьях");
-        }
-    }
-
-    public static void checkUserLike(Boolean isUserLikeFilm) {
-        if (!isUserLikeFilm) {
-            throw new UserNotFoundException("Пользователь не лайкал фильм");
         }
     }
 

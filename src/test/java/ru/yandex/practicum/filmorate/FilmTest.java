@@ -1,9 +1,10 @@
-/*
 package ru.yandex.practicum.filmorate;
 
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.controller.FilmController;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
@@ -18,12 +19,12 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 @SpringBootTest
+@AutoConfigureTestDatabase(replace= AutoConfigureTestDatabase.Replace.NONE)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmTest {
     FilmController filmController;
     @Autowired
     FilmService filmService;
-    @Autowired
-    FilmStorage filmStorage;
 
     @BeforeEach
     void createController() {
@@ -39,7 +40,7 @@ public class FilmTest {
                 .duration(100)
                 .build();
         Film filmSave = filmController.create(film);
-        assertEquals(film, filmSave);
+        assertEquals(filmService.findFilmById(6L).get(), filmSave);
     }
 
     @Test
@@ -94,7 +95,7 @@ public class FilmTest {
                 .duration(100)
                 .build();
         Film filmSave = filmController.create(film);
-        assertEquals(film, filmSave);
+        assertEquals(filmService.findFilmById(5L).get(), filmSave);
     }
 
     @Test
@@ -132,7 +133,7 @@ public class FilmTest {
                 .duration(100)
                 .build();
         Film filmSave = filmController.create(film);
-        assertEquals(film, filmSave);
+        assertEquals(filmController.findFilmById(3L).get(), filmSave);
     }
 
     @Test
@@ -165,7 +166,7 @@ public class FilmTest {
                 .duration(100)
                 .build();
         Film filmUpdate = filmController.update(film);
-        assertEquals(film, filmUpdate);
+        assertEquals(filmService.findFilmById(1L).get(), filmUpdate);
         assertNotEquals(filmSave, filmUpdate);
     }
 
@@ -184,4 +185,3 @@ public class FilmTest {
     }
 
 }
-*/
