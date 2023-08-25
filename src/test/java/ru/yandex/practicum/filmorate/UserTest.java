@@ -127,7 +127,7 @@ public class UserTest {
                 .birthday(LocalDate.now().minus(1, ChronoUnit.DAYS))
                 .build();
         User userSave = userController.create(user);
-        assertEquals(userController.findUserById(3L), userSave);
+        assertEquals(userController.findUserById(1L), userSave);
     }
 
     @Test
