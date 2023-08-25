@@ -39,7 +39,7 @@ public class FilmTest {
                 .duration(100)
                 .build();
         Film filmSave = filmController.create(film);
-        assertEquals(filmService.findFilmById(6L).get(), filmSave);
+        assertEquals(filmService.findFilmById(1L).get(), filmSave);
     }
 
     @Test
@@ -94,7 +94,7 @@ public class FilmTest {
                 .duration(100)
                 .build();
         Film filmSave = filmController.create(film);
-        assertEquals(filmService.findFilmById(5L).get(), filmSave);
+        assertEquals(filmService.findFilmById(1L).get(), filmSave);
     }
 
     @Test
@@ -132,7 +132,7 @@ public class FilmTest {
                 .duration(100)
                 .build();
         Film filmSave = filmController.create(film);
-        assertEquals(filmController.findFilmById(3L).get(), filmSave);
+        assertEquals(filmController.findFilmById(1L).get(), filmSave);
     }
 
     @Test
