@@ -1,13 +1,14 @@
 package ru.yandex.practicum.filmorate.utilites;
 
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.MPA;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Slf4j
 public class Validation {
@@ -49,9 +50,32 @@ public class Validation {
         }
     }
 
-    public static void checkUserExists(Long id, UserStorage userStorage) {
-        if (userStorage.findUserById(id) == null) {
-            throw new UserNotFoundException("Друга с таким Id нет");
+    public static void checkUserExists(Optional<User> user) {
+        if (user.isEmpty()) {
+            log.warn("Пользователь не найден в БД");
+            throw new UserNotFoundException("Пользователя не найден");
         }
     }
+
+    public static void checkGenreExists(Optional<Genre> genre) {
+        if (genre.isEmpty()) {
+            log.warn("Жанр не найден в БД");
+            throw new GenreNotFoundException("Жанр не найден");
+        }
+    }
+
+    public static void checkMPAExists(Optional<MPA> mpa) {
+        if (mpa.isEmpty()) {
+            log.warn("Рейтинг не найден в БД");
+            throw new MPANotFoundException("Рейтинга не найден");
+        }
+    }
+
+    public static void checkFriendExists(Boolean confirmFriend) {
+        if (!confirmFriend) {
+            log.warn("Пользотваель не найден, либо он уже добавлен в друзья");
+            throw new UserNotFoundException("Запрос на добавления в друзья нет, либо он уже в друзьях");
+        }
+    }
+
 }

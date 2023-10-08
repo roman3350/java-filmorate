@@ -7,7 +7,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -64,15 +63,20 @@ public class UserController {
     }
 
     /**
-     * Добавляет пользователя в друзья
+     * Отправляет запрос в друзья
      *
      * @param id       id пользователя
      * @param friendId id друга
-     * @return добавленный друг
+     * @return пользователь, которому отправили запрос
      */
     @PutMapping("/{id}/friends/{friendId}")
-    public User addFriend(@PathVariable Long id, @PathVariable Long friendId) {
-        return userService.addFriend(id, friendId);
+    public User requestToFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        return userService.requestToFriend(id, friendId);
+    }
+
+    @PutMapping("/{id}/confirmFriend/{friendId}")
+    public User confirmFriend(@PathVariable Long id, @PathVariable Long friendId) {
+        return userService.confirmFriend(id, friendId);
     }
 
     /**
@@ -94,7 +98,7 @@ public class UserController {
      * @return друзя пользователя
      */
     @GetMapping("/{id}/friends")
-    public List<User> getFriends(@PathVariable Long id) {
+    public Collection<User> getFriends(@PathVariable Long id) {
         return userService.getFriends(id);
     }
 
@@ -106,7 +110,7 @@ public class UserController {
      * @return общие друзья
      */
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
+    public Collection<User> getCommonFriends(@PathVariable Long id, @PathVariable Long otherId) {
         return userService.commonFriends(id, otherId);
     }
 }

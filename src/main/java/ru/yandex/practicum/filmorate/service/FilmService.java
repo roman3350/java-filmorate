@@ -3,15 +3,11 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.interfaces.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.interfaces.UserStorage;
+import ru.yandex.practicum.filmorate.dao.FilmStorage;
+import ru.yandex.practicum.filmorate.dao.UserStorage;
 
 import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static ru.yandex.practicum.filmorate.utilites.Validation.checkUserExists;
+import java.util.Optional;
 
 @Service
 public class FilmService {
@@ -25,11 +21,23 @@ public class FilmService {
     }
 
     /**
+     * Принимает из пути id и выводит фильм по этому id
+     *
+     * @param id id фильма
+     * @return фильм по id
+     */
+
+    public Optional<Film> findFilmById(Long id) {
+        return filmStorage.findFilmById(id);
+    }
+
+    /**
      * Принимает из тела запроса фильм и добавляет его
      *
      * @param film объект фильма
      * @return добавленный объект фильма
      */
+
     public Film create(Film film) {
         return filmStorage.create(film);
     }
@@ -40,6 +48,7 @@ public class FilmService {
      * @param film объект фильма
      * @return обновленный фильм
      */
+
     public Film update(Film film) {
         return filmStorage.update(film);
     }
@@ -49,18 +58,9 @@ public class FilmService {
      *
      * @return список всех фильмов
      */
+
     public Collection<Film> findAll() {
         return filmStorage.findAll();
-    }
-
-    /**
-     * Принимает из пути id и выводит фильм по этому id
-     *
-     * @param id id фильма
-     * @return фильм по id
-     */
-    public Film findFilmById(Long id) {
-        return filmStorage.findById(id);
     }
 
     /**
@@ -70,10 +70,9 @@ public class FilmService {
      * @param userId id пользователя ставящего лайк
      * @return лайкнутый фильм
      */
+
     public Film addLike(Long filmId, Long userId) {
-        checkUserExists(userId, userStorage);
-        filmStorage.findById(filmId).getIdLike().add(userId);
-        return filmStorage.findById(filmId);
+        return filmStorage.addLike(filmId, userId);
     }
 
     /**
@@ -83,10 +82,9 @@ public class FilmService {
      * @param userId id пользователя чей лайк надо удалить
      * @return фильм с которого удалили лайк
      */
+
     public Film deleteLike(Long filmId, Long userId) {
-        checkUserExists(userId, userStorage);
-        filmStorage.findById(filmId).getIdLike().remove(userId);
-        return filmStorage.findById(filmId);
+        return filmStorage.deleteLike(filmId, userId);
     }
 
     /**
@@ -95,10 +93,9 @@ public class FilmService {
      * @param count количество фильмов которые надо вывести
      * @return список фильмов
      */
-    public List<Film> getFilmQuantityLike(int count) {
-        return filmStorage.findAll().stream()
-                .sorted(Comparator.comparingInt(p0 -> -p0.getIdLike().size()))
-                .limit(count)
-                .collect(Collectors.toList());
+
+    public Collection<Film> getFilmQuantityLike(int count) {
+        return filmStorage.getFilmQuantityLike(count);
     }
+
 }
